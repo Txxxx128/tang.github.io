@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电力电子 × AI · 学习博客</title>
+<style>
+  :root {
+    --primary: #1f3b73;
+    --accent: #2c6fbb;
+    --text: #2d2d2d;
+    --muted: #8a94a6;
+    --bg: #f7f8fa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.7;
+  }
+  .container { max-width: 800px; margin: 0 auto; padding: 48px 24px 80px; }
+
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+  }
+  header h1 {
+    font-size: 2.2em;
+    color: var(--primary);
+    margin-bottom: 8px;
+  }
+  header .subtitle {
+    color: var(--muted);
+    font-size: 1.05em;
+  }
+  header .tags {
+    margin-top: 16px;
+  }
+  .tag {
+    display: inline-block;
+    background: #eef4ff;
+    color: var(--accent);
+    padding: 4px 14px;
+    margin: 4px;
+    border-radius: 20px;
+    font-size: 0.85em;
+  }
+
+  .post-card {
+    display: block;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+    text-decoration: none;
+    color: inherit;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .post-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.1);
+  }
+  .post-card .date {
+    color: var(--muted);
+    font-size: 0.85em;
+    margin-bottom: 6px;
+  }
+  .post-card h2 {
+    color: var(--primary);
+    font-size: 1.3em;
+    margin-bottom: 8px;
+  }
+  .post-card p {
+    color: #4a5568;
+    font-size: 0.95em;
+  }
+
+  footer {
+    text-align: center;
+    color: var(--muted);
+    margin-top: 48px;
+    font-size: 0.85em;
+  }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>电力电子 × AI 学习博客</h1>
+  <div class="subtitle">LLM / Agent 驱动的微电网与电力电子控制笔记</div>
+  <div class="tags">
+    <span class="tag">微电网</span>
+    <span class="tag">多智能体</span>
+    <span class="tag">PersonaLLM</span>
+    <span class="tag">强化学习</span>
+    <span class="tag">MPC</span>
+    <span class="tag">RAG</span>
+  </div>
+</header>
+
+<div class="post-card" href="#" style="cursor:default">
+  <div class="date">2026-08-14 · W11</div>
+  <h2>当储能有了"人格"：用 PersonaLLM 驱动微电网 Multi-Agent 调度</h2>
+  <p>用 AutoGen 搭建四个微电网 Agent，通过报价-协商实现去中心化协调，再注入三种人格观察决策差异，最后用 LP 精确量化人格的经济代价。</p>
+  <p style="margin-top:10px"><a href="posts/2026-08-14-persona-multiagent.html" style="color:var(--accent);font-weight:600">阅读全文 →</a></p>
+</div>
+
+<footer>
+  由 <a href="https://github.com/">GitHub Pages</a> 驱动 · 持续更新中
+</footer>
+
+</div>
+</body>
+</html>
