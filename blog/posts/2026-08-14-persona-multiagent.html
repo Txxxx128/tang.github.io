@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>当储能有了"人格"：用 PersonaLLM 驱动微电网 Multi-Agent 调度</title>
+<style>
+  :root {
+    --primary: #1f3b73;
+    --accent: #2c6fbb;
+    --text: #2d2d2d;
+    --muted: #666666;
+    --bg: #fafafa;
+    --card: #ffffff;
+    --border: #e5e7eb;
+    --code-bg: #f4f6f8;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", "Segoe UI", sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    line-height: 1.8;
+    font-size: 16px;
+  }
+  .container {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
+  header {
+    text-align: center;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid var(--primary);
+  }
+  h1 {
+    font-size: 2em;
+    color: var(--primary);
+    line-height: 1.3;
+    margin-bottom: 12px;
+  }
+  .meta {
+    color: var(--muted);
+    font-size: 0.9em;
+  }
+  h2 {
+    font-size: 1.4em;
+    color: var(--primary);
+    margin: 40px 0 16px;
+    padding-left: 12px;
+    border-left: 4px solid var(--accent);
+  }
+  h3 {
+    font-size: 1.15em;
+    color: var(--accent);
+    margin: 28px 0 12px;
+  }
+  p { margin: 12px 0; }
+  blockquote {
+    background: #f0f6ff;
+    border-left: 4px solid var(--accent);
+    padding: 14px 18px;
+    margin: 20px 0;
+    border-radius: 0 8px 8px 0;
+    color: #3a4a5a;
+  }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: var(--card);
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  }
+  th, td {
+    padding: 10px 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+  }
+  th {
+    background: var(--primary);
+    color: #fff;
+    font-weight: 600;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) td { background: #f8fafc; }
+  code {
+    background: var(--code-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: "SF Mono", Consolas, "Courier New", monospace;
+    font-size: 0.9em;
+    color: #c7254e;
+  }
+  pre {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 18px 20px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 20px 0;
+    font-family: "SF Mono", Consolas, "Courier New", monospace;
+    font-size: 0.85em;
+    line-height: 1.6;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+  .highlight {
+    color: var(--accent);
+    font-weight: 600;
+  }
+  footer {
+    margin-top: 60px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+    text-align: center;
+    color: var(--muted);
+    font-size: 0.9em;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+
+<header>
+  <h1>当储能有了"人格"：用 PersonaLLM 驱动微电网 Multi-Agent 调度</h1>
+  <div class="meta">博客 10 · W11 成果 · 电力电子学习笔记</div>
+</header>
+
+<h2>引子：一个微电网，四个"员工"</h2>
+<p>假设你是一家微电网的运营者。每天早上，你需要回答三个问题：</p>
+<ol>
+  <li>今天光伏能发多少电？</li>
+  <li>负荷要用多少电？</li>
+  <li>储能电池该怎么充放电，才能既省钱又不伤害电池？</li>
+</ol>
+<p>传统做法是<strong>一个大脑集中决策</strong>：把所有数据喂给一个优化算法，算出最优解。</p>
+<p>但真实的电力系统不是这样的。真实的市场里，光伏电站、储能运营商、负荷用户都是<strong>独立的利益主体</strong>，它们通过<strong>价格信号</strong>互相协调，而不是听从一个中央命令。</p>
+<p>这正是本周我要做的事：<strong>用 Multi-Agent（多智能体）框架，让微电网里的每个设备"活"起来，拥有自己的角色、工具，甚至人格。</strong></p>
+
+<h2>一、四个 Agent，各司其职</h2>
+<p>我基于 <strong>AutoGen</strong> 框架（微软开源的多智能体框架）搭了一个微电网调度系统，定义了四个角色：</p>
+<table>
+  <thead>
+    <tr><th>Agent</th><th>职责</th><th>工具箱</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>光伏 Agent</strong></td><td>光伏发电的"眼睛"</td><td>查询预测出力、实际出力</td></tr>
+    <tr><td><strong>储能 Agent</strong></td><td>电池的"管家"</td><td>查询 SOC、充放电功率限制</td></tr>
+    <tr><td><strong>负荷 Agent</strong></td><td>负荷的"代言人"</td><td>查询负荷预测</td></tr>
+    <tr><td><strong>调度 Agent</strong></td><td>全局"决策者"</td><td>查询电价</td></tr>
+  </tbody>
+</table>
+<p>每个 Agent 有两个关键要素：</p>
+<ol>
+  <li><strong>角色描述（system_message）</strong>：告诉它"你是谁、你该做什么、不该做什么"</li>
+  <li><strong>工具列表（tools）</strong>：给它能调用的 Python 函数</li>
+</ol>
+<p>Agent 会在对话中<strong>自主决定</strong>何时调用工具获取数据。比如储能 Agent 被问到时，会自动调用 <code>get_soc()</code> 拿到 SOC，再基于数据回答。</p>
+<blockquote>💡 <strong>关键点</strong>：Agent 不是被动执行，而是"带着目的"去查数据、做判断。这背后是 LLM 的 <strong>function calling</strong> 能力——模型能理解"我需要先查 SOC 才能回答"。</blockquote>
+
+<h2>二、报价-协商-执行：让 Agent 讨价还价</h2>
+<p>光有角色还不够。真实的协调需要<strong>价格信号</strong>。于是我在四个 Agent 之间加了一套"报价-协商-执行"协议。</p>
+<p><strong>场景</strong>：上午 11 点，光伏过剩 6 kW，储能 SOC 偏低 30%，负荷 6.5 kW。</p>
+<p>对话是这样展开的（真实 DeepSeek 驱动）：</p>
+<pre>储能 Agent：我报充电服务价 0.45 元/kWh
+           （以售电价 0.2 为底线、购电价 0.6 为上限，我赚差价）
+
+调度 Agent：还价 0.30 元/kWh
+           （弃光的边际价值只有 0.2 元，0.45 太高了）
+
+储能 Agent：接受 0.30 元/kWh
+           （正好在我可接受的底线，且 SOC 低充电对我也有利）
+
+调度 Agent：执行！储能充 2.5 kW，负荷直供 6.5 kW，剩余 5 kW 弃光</pre>
+<p><strong>两个 Agent 居然真的讨价还价了</strong>，而且逻辑专业得让人意外：</p>
+<ul>
+  <li>储能 Agent 分析了"弃光高峰期自己有谈判优势"，所以报了个偏高的价</li>
+  <li>调度 Agent 用"弃光边际价值 0.2 元"来压价</li>
+  <li>最终收敛到 <span class="highlight">0.30 元/kWh</span>——一个双方都能接受的均衡点</li>
+</ul>
+<blockquote>💡 <strong>关键洞察</strong>：这个 0.30 元不是谁拍脑袋定的，而是<strong>价格信号协调</strong>的自然结果——既高于弃光价值（0.2），又低于购电价（0.6）。这就是去中心化市场的魅力。</blockquote>
+
+<h2>三、PersonaLLM：给储能注入"人格"</h2>
+<p>前面的储能 Agent 是"理性经济人"。但现实中，不同运营者的风险偏好天差地别：</p>
+<ul>
+  <li>有人<strong>保守</strong>：宁可少赚，绝不让电池冒险</li>
+  <li>有人<strong>激进</strong>：只要有利可图，敢把电池用到极限</li>
+  <li>有人<strong>均衡</strong>：折中行事</li>
+</ul>
+<p>这就是 <strong>PersonaLLM</strong> 的思想：<strong>通过 system_message 注入人格化决策偏好，让同一个 Agent 在相同环境下做出不同决策。</strong></p>
+<p>我给储能 Agent 写了三种人格设定，喂给相同的电价场景（分时电价：峰 0.9 / 平 0.5 / 谷 0.2 元，初始 SOC 50%）。</p>
+<p>结果差异显著：</p>
+<table>
+  <thead>
+    <tr><th>人格</th><th>SOC 区间</th><th>决策风格</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>保守型 🛡️</td><td>20%~80%</td><td>只等 22 点低谷充电，放电止于 35%，"宁可少赚不冒险"</td></tr>
+    <tr><td>激进型 🚀</td><td>10%~95%</td><td>8 点就放空到 10%，12 点也敢充回 95%，"就是干！"</td></tr>
+    <tr><td>均衡型 ⚖️</td><td>20%~90%</td><td>分级放电保 20% 底线，充到 90% 留余量</td></tr>
+  </tbody>
+</table>
+<p>最精彩的是，它们连<strong>自我解释</strong>都带着人格色彩：</p>
+<ul>
+  <li>保守型列了一张"合规检查"清单，逐条验证 SOC 不触底线</li>
+  <li>激进型逐笔算账"每度电净赚 0.4 元"，最后来一句"就是干！💪"</li>
+  <li>均衡型解释"为什么 19 点不放电"——因为 15 点已到 20% 安全下限</li>
+</ul>
+
+<h2>四、人格的经济代价：一场 LP 精确的"算账"</h2>
+<p>定性描述人格差异还不够，我更进一步：<strong>把人格量化为约束，用线性规划精确计算经济后果。</strong></p>
+<p>直觉上，人格差异的本质是 <strong>SOC 约束差异</strong>：</p>
+<ul>
+  <li>保守型 SOC ∈ [20%, 80%] → 可用容量小</li>
+  <li>激进型 SOC ∈ [10%, 95%] → 可用容量大</li>
+</ul>
+<p>用 <code>scipy.linprog</code> 求解三种人格在相同电价下的最大套利收益：</p>
+<table>
+  <thead>
+    <tr><th>人格</th><th>SOC 区间</th><th>日收益</th><th>可用容量</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>保守型</td><td>20%~80%</td><td><strong>3.06 元</strong></td><td>3.6 kWh</td></tr>
+    <tr><td>均衡型</td><td>20%~90%</td><td><strong>3.57 元</strong></td><td>4.2 kWh</td></tr>
+    <tr><td>激进型</td><td>10%~95%</td><td><strong>4.32 元</strong></td><td>5.1 kWh</td></tr>
+  </tbody>
+</table>
+<p><span class="highlight">激进型比保守型多赚 1.27 元，代价是 SOC 跌到 10%——低于储能安全下限 20%。</span></p>
+<blockquote>💡 <strong>关键洞察</strong>：收益与安全是 trade-off。人格越激进，可用容量越大，赚得越多，但也越接近危险的边缘。这就是下一周要解决的"约束感知"问题的由来。</blockquote>
+
+<h2>五、总结：从"一个大脑"到"一群有性格的 Agent"</h2>
+<p>本周完成了一次从集中式到分布式的范式跳跃：</p>
+<pre>集中式：所有数据 → 一个优化算法 → 最优解
+分布式：多个 Agent → 价格信号 + 人格偏好 → 涌现的协调</pre>
+<p>三个核心收获：</p>
+<ol>
+  <li><strong>价格信号是去中心化协调的关键</strong>——Agent 自主定价、讨价还价，收敛到均衡点</li>
+  <li><strong>人格本质是可量化的约束</strong>——激进型多赚的钱，来自放松安全约束</li>
+  <li><strong>收益与安全是 trade-off</strong>——这直接引出"约束感知 Agent"的研究问题</li>
+</ol>
+<p>这套系统是 <strong>WukongAgent</strong> 的雏形。下一周，我要给它加上"安全层"：让 Agent 在追求收益的同时，<strong>绝不越界</strong>——这才是能真正投入电网运行的 Agent。</p>
+
+<footer>
+  下一篇：约束感知决策的电力安全意义（W12）
+</footer>
+
+</div>
+</body>
+</html>
